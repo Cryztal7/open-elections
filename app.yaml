@@ -10,7 +10,7 @@ handlers:
   upload: favicon\.ico
 
 - url: /import
-  static-files: import.html
+  static_files: import.html
   upload: import\.html
 
 - url: .*

@@ -15,6 +15,31 @@
 # limitations under the License.
 #
 import webapp2
+import csv
+import StringIO
+import json
+
+def process_csv_data(csv_data):
+    precinct_to_votes = {}
+
+    is_header = True
+    f = StringIO.StringIO(csv_data)
+    rows = csv.reader(f, delimiter=',')
+    for row in rows:
+        if is_header:
+            is_header = False
+            continue
+        else:
+            county = row[0]
+            precinct = row[1]
+            votes = row[6]
+            vote_entry = {}
+            vote_entry["county"] = county
+            vote_entry["precinct"] = precinct
+            vote_entry["votes"] = votes
+            precinct_to_votes[precinct] = vote_entry
+
+    return precinct_to_votes
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -22,7 +47,9 @@ class MainHandler(webapp2.RequestHandler):
 class UploadHandler(webapp2.RequestHandler):
     def post(self):
         csv_data = self.request.POST.get('csv_file').file.read()
-        self.response.out.write(csv_data)
+        results = process_csv_data(csv_data)
+        for key in results:
+            self.response.out.write(json.dumps(results[key]) + "<br>")
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
